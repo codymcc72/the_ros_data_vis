@@ -44,16 +44,20 @@
 
     // Subscribe to the UVC light status topic and update the HTML content
     uvcLightStatusListener.subscribe(function (message) {
-      let lightStatus = message.data;
-      let isOn = false;
-
-      if (lightStatus === "1111111") {
-        isOn = true;
-      }
-
-      let lightStatusText = isOn ? "Lights are On" : "Lights are OFF";
-      document.getElementById('uvc-light-status').innerHTML = lightStatusText;
+      document.getElementById('uvc-light-status').innerHTML = 'Received: ' + message.data;
     });
+
+    // Load JSON data using Fetch API and execute accessJSONData() on completion
+    fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
+      .then(response => response.json())
+      .then(data => {
+        json = data; // Store the JSON data in the 'json' variable
+        accessJSONData(); // Execute the function after data is loaded
+      });
+
+    function accessJSONData() {
+      console.log(json.points[0].head.position.x);
+    }
   </script>
 </body>
 </html>
