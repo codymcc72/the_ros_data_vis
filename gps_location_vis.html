@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+</head>
+<body>
+    <h1>ROS Data Visualization Using rosbridge_suite and Websocket</h1>
+    <div id="gps-data"></div>
+    <script type="text/javascript">
+        // Create a ROS instance
+        var ros = new ROSLIB.Ros({
+            url: 'ws://0.0.0.0:9090' // default rosbridge server address
+        });
+
+        // Create a topic listener
+        var listener = new ROSLIB.Topic({
+            ros: ros,
+            name: '/tric_navigation/location/gps_head_driver',
+            messageType: 'sensor_msgs/NavSatFix'
+        });
+
+        // Subscribe to the topic and update the HTML content
+        listener.subscribe(function (message) {
+            let latitude = message.latitude;
+            let longitude = message.longitude;
+            let timestamp = message.timestamp;
+
+            let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}, Timestamp: ${timestamp}`;
+
+            document.getElementById('gps-data').innerHTML = gpsData;
+        });
+    </script>
+</body>
+</html>
