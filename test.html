@@ -3,10 +3,9 @@
 <head>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
-  <script src="https://raw.githubusercontent.com/codymcc72/json_data_vis/main/2.json"></script>
 
 </head>
-<body>
+<body onload="accessJSONData()">
   <h1>ROS Data Visualization</h1>
   <div id="combined-data">
     <div id="gps-data"></div>
@@ -14,6 +13,10 @@
     <div id="uvc-light-status"></div>
   </div>
   <script type="text/javascript">
+
+    //const requestURL = "https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json";
+    //src ="${requestURL}"
+
     // Create a ROS instance
     var ros = new ROSLIB.Ros({
       url: 'ws://0.0.0.0:9090' // default rosbridge server address
@@ -49,8 +52,10 @@
       document.getElementById('uvc-light-status').innerHTML = 'Received: ' + message.data;
     });
 
+    function accessJSONData() {
     console.log(json.points[0].head.position.latitude);
-
+    }
   </script>
+
 </body>
 </html>
