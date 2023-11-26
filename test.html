@@ -28,9 +28,9 @@
     gpsListener.subscribe(function (message) {
       let latitude = message.latitude;
       let longitude = message.longitude;
-      let timestamp = message.timestamp;
+      //let timestamp = message.timestamp;
 
-      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}, Timestamp: ${timestamp}`;
+      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`; //, Timestamp: ${timestamp}
 
       document.getElementById('gps-data').innerHTML = gpsData;
     });
@@ -48,7 +48,7 @@
     });
 
     // Load JSON data using Fetch API and execute accessJSONData() on completion
-    fetch('https://cdn.jsdelivr.net/gh/codymcc72/json-data-vis/2.json')
+    fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
       .then(response => response.json())
       .then(data => {
         json = data; // Store the JSON data in the 'json' variable
