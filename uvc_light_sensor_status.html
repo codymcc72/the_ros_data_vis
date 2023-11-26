@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+</head>
+<body>
+    <h1>ROS Data Visualization Using rosbridge_suite and Websocket</h1>
+    <div id="data"></div>
+    <script type="text/javascript">
+        // Create a ROS instance
+        var ros = new ROSLIB.Ros({
+            url: 'ws://0.0.0.0:9090' // default rosbridge server address
+        });
+
+        // Create a topic listener
+        var listener = new ROSLIB.Topic({
+            ros: ros,
+            name: '/tric_navigation/uvc_light_status',
+            messageType: 'std_msgs/String'
+        });
+
+        // Subscribe to the topic and update the HTML content
+        listener.subscribe(function (message) {
+            document.getElementById('data').innerHTML = 'Received: ' + message.data;
+        });
+    </script>
+</body>
+</html>
