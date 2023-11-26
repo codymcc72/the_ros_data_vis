@@ -28,9 +28,9 @@
     gpsListener.subscribe(function (message) {
       let latitude = message.latitude;
       let longitude = message.longitude;
-      let timestamp = message.timestamp;
+      //let timestamp = message.timestamp;
 
-      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}, Timestamp: ${timestamp}`;
+      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`; //, Timestamp: ${timestamp}
 
       document.getElementById('gps-data').innerHTML = gpsData;
     });
@@ -44,7 +44,15 @@
 
     // Subscribe to the UVC light status topic and update the HTML content
     uvcLightStatusListener.subscribe(function (message) {
-      document.getElementById('uvc-light-status').innerHTML = 'Received: ' + message.data;
+      let lightStatus = message.data;
+      let isOn = false;
+
+      if (lightStatus === "1111111") {
+        isOn = true;
+      }
+
+      let lightStatusText = isOn ? "Lights are On" : "Lights are OFF";
+      document.getElementById('uvc-light-status').innerHTML = lightStatusText;
     });
   </script>
 </body>
