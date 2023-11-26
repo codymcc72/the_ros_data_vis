@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+  <script src="https://raw.githubusercontent.com/codymcc72/json_data_vis/blob/main/2.json"></script>
+
+</head>
+<body>
+  <h1>ROS Data Visualization</h1>
+  <div id="combined-data">
+    <div id="gps-data"></div>
+    <hr>
+    <div id="uvc-light-status"></div>
+  </div>
+  <script type="text/javascript">
+    // Create a ROS instance
+    var ros = new ROSLIB.Ros({
+      url: 'ws://0.0.0.0:9090' // default rosbridge server address
+    });
+
+    // Create a topic listener for GPS data
+    var gpsListener = new ROSLIB.Topic({
+      ros: ros,
+      name: '/tric_navigation/location/gps_head_driver',
+      messageType: 'sensor_msgs/NavSatFix'
+    });
+
+    // Subscribe to the GPS topic and update the HTML content
+    gpsListener.subscribe(function (message) {
+      let latitude = message.latitude;
+      let longitude = message.longitude;
+      let timestamp = message.timestamp;
+
+      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}, Timestamp: ${timestamp}`;
+
+      document.getElementById('gps-data').innerHTML = gpsData;
+    });
+
+    // Create a topic listener for UVC light status
+    var uvcLightStatusListener = new ROSLIB.Topic({
+      ros: ros,
+      name: '/tric_navigation/uvc_light_status',
+      messageType: 'std_msgs/String'
+    });
+
+    // Subscribe to the UVC light status topic and update the HTML content
+    uvcLightStatusListener.subscribe(function (message) {
+      document.getElementById('uvc-light-status').innerHTML = 'Received: ' + message.data;
+    });
+
+    console.log(json.points[0].head.position.latitude);
+
+  </script>
+</body>
+</html>
