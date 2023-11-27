@@ -66,180 +66,173 @@
   </div>
 
   <!-- JavaScript code for ROS Data Visualization -->
-  <script type="text/javascript">
-    // Creates a ROS instance
-    var ros = new ROSLIB.Ros({
-      url: 'ws://0.0.0.0:9090' // default rosbridge server address
-    });
+<script type="text/javascript">
+  // Creates a ROS instance
+  var ros = new ROSLIB.Ros({
+    url: 'ws://0.0.0.0:9090' // default rosbridge server address
+  });
 
-    // Declares the variables OUTSIDE of the functions
-    var homeLatitude;
-    var homeLongitude;
-    var totalRobotDistance = 0; // Variable to store the total distance traveled by the robot
-    var reachedPoints = []; // Array to store reached points
+  // Declares the variables OUTSIDE of the functions
+  var homeLatitude;
+  var homeLongitude;
+  var totalRobotDistance = 0; // Variable to store the total distance traveled by the robot
+  var reachedPoints = []; // Array to store reached points
 
-    // Creates a topic listener for GPS data
-    var gpsListener = new ROSLIB.Topic({
-      ros: ros,
-      name: '/tric_navigation/location/gps_head_driver',
-      messageType: 'sensor_msgs/NavSatFix'
-    });
+  // Creates a topic listener for GPS data
+  var gpsListener = new ROSLIB.Topic({
+    ros: ros,
+    name: '/tric_navigation/location/gps_head_driver',
+    messageType: 'sensor_msgs/NavSatFix'
+  });
 
-    // Creates a topic listener for UVC light status
-    var uvcLightStatusListener = new ROSLIB.Topic({
-      ros: ros,
-      name: '/tric_navigation/uvc_light_status',
-      messageType: 'std_msgs/String'
-    });
+  // Creates a topic listener for UVC light status
+  var uvcLightStatusListener = new ROSLIB.Topic({
+    ros: ros,
+    name: '/tric_navigation/uvc_light_status',
+    messageType: 'std_msgs/String'
+  });
 
-    // Function to calculate distance using Haversine formula
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Radius of the Earth in kilometers
-      const dLat = (lat2 - lat1) * (Math.PI / 180);
-      const dLon = (lon2 - lon1) * (Math.PI / 180);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c; // Distance in kilometers
+  // Function to update the total distance when a new position is received
+  function updateTotalRobotDistance(newLatitude, newLongitude) {
+    if (homeLatitude !== undefined && homeLongitude !== undefined) {
+      const dx = newLongitude - homeLongitude;
+      const dy = newLatitude - homeLatitude;
+      const distance = Math.sqrt(dx ** 2 + dy ** 2);
 
-      // Convert distance to feet (1 km ≈ 3280.84 feet)
-      return distance * 3280.84;
-    }
-
-    // Function to update the total distance when a new position is received
-    function updateTotalRobotDistance(newLatitude, newLongitude) {
-      if (homeLatitude !== undefined && homeLongitude !== undefined) {
-        // Calculate the distance using the Haversine formula
-        const distance = haversineDistance(homeLatitude, homeLongitude, newLatitude, newLongitude);
-
-        // Add the distance to the total
-        totalRobotDistance += distance;
-      }
+      // Add the distance to the total
+      totalRobotDistance += distance;
 
       // Update home coordinates for the next calculation
       homeLatitude = newLatitude;
       homeLongitude = newLongitude;
 
-      // Example usage
-      console.log('Total Robot Distance:', totalRobotDistance);
+      // Update the display of total robot distance
+      updateTotalDistanceDisplay();
     }
+  }
 
-    // Subscribes to the GPS topic and update the ROS GPS content
-    gpsListener.subscribe(function (message) {
-      let latitude = message.latitude;
-      let longitude = message.longitude;
+  // Update the display of total robot distance
+  function updateTotalDistanceDisplay() {
+    // Display the total distance on the webpage as a number
+    document.getElementById('total-distance-info').innerHTML = `Total Robot Distance: ${totalRobotDistance.toFixed(2)} meters`;
+  }
 
-      let rosGpsData = `GPS: Latitude: ${latitude}<br> GPS: Longitude: ${longitude}<br>`;
+  // Subscribes to the GPS topic and update the ROS GPS content
+  gpsListener.subscribe(function (message) {
+    let latitude = message.latitude;
+    let longitude = message.longitude;
 
-      document.getElementById('ros-gps-data').innerHTML = rosGpsData;
+    let rosGpsData = `GPS: Latitude: ${latitude}<br> GPS: Longitude: ${longitude}<br>`;
 
-      // Checks if the ROS coordinates match any point in the JSON data
-      checkPointsReached(latitude, longitude);
+    document.getElementById('ros-gps-data').innerHTML = rosGpsData;
 
-      // Example usage (call this function when a new position is received)
-      const newLatitude = latitude;
-      const newLongitude = longitude;
-      updateTotalRobotDistance(newLatitude, newLongitude);
+    // Checks if the ROS coordinates match any point in the JSON data
+    checkPointsReached(latitude, longitude);
+
+    // Example usage (call this function when a new position is received)
+    const newLatitude = latitude;
+    const newLongitude = longitude;
+    updateTotalRobotDistance(newLatitude, newLongitude);
+  });
+
+  // Subscribes to the UVC light status topic and update the HTML content
+  uvcLightStatusListener.subscribe(function (message) {
+    // Extracts the status from the message (assuming it's a string of 0s)
+    const uvcLightStatus = message.data.includes('0') ? 'Off' : 'On';
+
+    // Updates HTML content for UVC light status
+    document.getElementById('uvc-light-status').innerHTML = uvcLightStatus;
+  });
+
+  // Fetches JSON data
+  fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
+    .then(response => response.json())
+    .then(data => {
+      json = data; // Store the JSON data in the 'json' variable
     });
 
-    // Subscribes to the UVC light status topic and update the HTML content
-    uvcLightStatusListener.subscribe(function (message) {
-      // Extracts the status from the message (assuming it's a string of 0s)
-      const uvcLightStatus = message.data.includes('0') ? 'Off' : 'On';
+  // Accesses home point's latitude and longitude
+  function accessJSONData() {
+    homeLatitude = json.datum.latitude;
+    homeLongitude = json.datum.longitude;
 
-      // Updates HTML content for UVC light status
-      document.getElementById('uvc-light-status').innerHTML = uvcLightStatus;
-    });
+    // Accesses the first point
+    const relativeX = json.points[0].head.position.x;
+    const relativeY = json.points[0].head.position.y;
+    const isTreatmentArea = json.points[0].treatment_area;
 
-    // Fetches JSON data
-    fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
-      .then(response => response.json())
-      .then(data => {
-        json = data; // Store the JSON data in the 'json' variable
-      });
+    // Calculates the GPS coordinates by adding relative distances to the home point
+    const jsonGpsLatitude = homeLatitude + relativeY;
+    const jsonGpsLongitude = homeLongitude + relativeX;
 
-    // Accesses home point's latitude and longitude
-    function accessJSONData() {
-      homeLatitude = json.datum.latitude;
-      homeLongitude = json.datum.longitude;
+    // Creates a string with GPS information
+    const jsonGpsInfo = `Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}`;
 
-      // Accesses the first point
-      const relativeX = json.points[0].head.position.x;
-      const relativeY = json.points[0].head.position.y;
-      const isTreatmentArea = json.points[0].treatment_area;
+    // Creates string with treatment area information
+    const jsonTreatmentAreaInfo = `Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
 
-      // Calculates the GPS coordinates by adding relative distances to the home point
+    // Updates HTML content
+    document.getElementById('ros-gps-data').innerHTML = jsonGpsInfo;
+    document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
+  }
+
+  // Checks if the ROS coordinates match any point in the JSON data
+  function checkPointsReached(rosLatitude, rosLongitude) {
+    let matchFound = false;
+
+    for (const point of json.points) {
+      const relativeX = point.head.position.x;
+      const relativeY = point.head.position.y;
+      const isTreatmentArea = point.treatment_area;
+
       const jsonGpsLatitude = homeLatitude + relativeY;
       const jsonGpsLongitude = homeLongitude + relativeX;
 
-      // Creates a string with GPS information
-      const jsonGpsInfo = `Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}`;
+      if (rosLatitude === jsonGpsLatitude && rosLongitude === jsonGpsLongitude) {
+        // Add the reached point to the array
+        reachedPoints.push({
+          latitude: jsonGpsLatitude,
+          longitude: jsonGpsLongitude,
+          isTreatmentArea: isTreatmentArea
+        });
 
-      // Creates string with treatment area information
-      const jsonTreatmentAreaInfo = `Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
-
-      // Updates HTML content
-      document.getElementById('ros-gps-data').innerHTML = jsonGpsInfo;
-      document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
+        // Set the flag to true to indicate a match
+        matchFound = true;
+        break;
+      }
     }
 
-    // Checks if the ROS coordinates match any point in the JSON data
-    function checkPointsReached(rosLatitude, rosLongitude) {
-      let matchFound = false;
-
-      for (const point of json.points) {
-        const relativeX = point.head.position.x;
-        const relativeY = point.head.position.y;
-        const isTreatmentArea = point.treatment_area;
-
-        const jsonGpsLatitude = homeLatitude + relativeY;
-        const jsonGpsLongitude = homeLongitude + relativeX;
-
-        if (rosLatitude === jsonGpsLatitude && rosLongitude === jsonGpsLongitude) {
-          // Add the reached point to the array
-          reachedPoints.push({
-            latitude: jsonGpsLatitude,
-            longitude: jsonGpsLongitude,
-            isTreatmentArea: isTreatmentArea
-          });
-
-          // Set the flag to true to indicate a match
-          matchFound = true;
-          break;
-        }
+    // If no match is found, display "Not on Map"
+    if (!matchFound) {
+      // Check if "Not on Map" is already in the array before adding it
+      if (!reachedPoints.some(point => point.isNotOnMap)) {
+        reachedPoints.push({
+          isNotOnMap: true
+        });
       }
-
-      // If no match is found, display "Not on Map"
-      if (!matchFound) {
-        // Check if "Not on Map" is already in the array before adding it
-        if (!reachedPoints.some(point => point.isNotOnMap)) {
-          reachedPoints.push({
-            isNotOnMap: true
-          });
-        }
-      }
-
-      // Update the display of reached points
-      updateReachedPointsDisplay();
     }
 
     // Update the display of reached points
-    function updateReachedPointsDisplay() {
-      var pointsReachedInfo = '';
+    updateReachedPointsDisplay();
+  }
 
-      // Iterate through reached points and create a display string
-      for (const point of reachedPoints) {
-        if (point.isNotOnMap) {
-          pointsReachedInfo += `<div class="reached-point">Not on Map</div>`;
-        } else {
-          pointsReachedInfo += `<div class="reached-point">Point Reached: Latitude ${point.latitude}, Longitude ${point.longitude}, Treatment Area: ${point.isTreatmentArea ? 'Yes' : 'No'}</div>`;
-        }
+  // Update the display of reached points
+  function updateReachedPointsDisplay() {
+    var pointsReachedInfo = '';
+
+    // Iterate through reached points and create a display string
+    for (const point of reachedPoints) {
+      if (point.isNotOnMap) {
+        pointsReachedInfo += `<div class="reached-point">Not on Map</div>`;
+      } else {
+        pointsReachedInfo += `<div class="reached-point">Point Reached: Latitude ${point.latitude}, Longitude ${point.longitude}, Treatment Area: ${point.isTreatmentArea ? 'Yes' : 'No'}</div>`;
       }
-
-      // Update HTML content for reached points
-      document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
     }
-  </script>
+
+    // Update HTML content for reached points
+    document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
+  }
+</script>
+
 </body>
 </html>
