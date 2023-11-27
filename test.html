@@ -162,6 +162,7 @@
     .then(response => response.json())
     .then(data => {
       json = data; // Store the JSON data in the 'json' variable
+      accessJSONData();
     });
 
   // Accesses home point's latitude and longitude
