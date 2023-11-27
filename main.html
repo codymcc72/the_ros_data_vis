@@ -19,7 +19,8 @@
     }
 
     #json-data,
-    #ros-data {
+    #ros-data,
+    #points-reached {
       margin-bottom: 20px;
     }
 
@@ -27,8 +28,11 @@
       color: green;
     }
   </style>
+
+  <!--JavaScript libraries -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+
 </head>
 <body>
   <h1>ROS Data Visualization</h1>
@@ -43,22 +47,40 @@
       <h2>ROS Topic</h2>
       <div id="ros-gps-data"></div>
     </div>
+    <hr>
+    <div id="points-reached">
+      <h2>Points Reached</h2>
+      <div id="points-reached-info"></div>
+    </div>
     <div id="uvc-light-status"></div>
   </div>
+
+  <!-- Code for ROS Data Visualization in JS -->
   <script type="text/javascript">
-    // Create a ROS instance
+    // Creates a ROS instance
     var ros = new ROSLIB.Ros({
       url: 'ws://0.0.0.0:9090' // default rosbridge server address
     });
 
-    // Create a topic listener for GPS data
+    // Declares the variables outside the functions
+    var homeLatitude
+    var homeLongitude; 
+
+    // Creates a topic listener for GPS data
     var gpsListener = new ROSLIB.Topic({
       ros: ros,
       name: '/tric_navigation/location/gps_head_driver',
       messageType: 'sensor_msgs/NavSatFix'
     });
 
-    // Subscribe to the GPS topic and update the ROS GPS content
+    // Creates a topic listener for UVC light status
+    var uvcLightStatusListener = new ROSLIB.Topic({
+      ros: ros,
+      name: '/tric_navigation/uvc_light_status',
+      messageType: 'std_msgs/String'
+    });
+
+    // Subscribes to the GPS topic and update the ROS GPS content
     gpsListener.subscribe(function (message) {
       let latitude = message.latitude;
       let longitude = message.longitude;
@@ -66,21 +88,17 @@
       let rosGpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`;
 
       document.getElementById('ros-gps-data').innerHTML = rosGpsData;
+
+      // Checks if the ROS coordinates match any point in the JSON data
+      checkPointsReached(latitude, longitude);
     });
 
-    // Create a topic listener for UVC light status
-    var uvcLightStatusListener = new ROSLIB.Topic({
-      ros: ros,
-      name: '/tric_navigation/uvc_light_status',
-      messageType: 'std_msgs/String'
-    });
-
-    // Subscribe to the UVC light status topic and update the HTML content
+    // Subscribes to the UVC light status topic and update the HTML content
     uvcLightStatusListener.subscribe(function (message) {
       document.getElementById('uvc-light-status').innerHTML = 'Received: ' + message.data;
     });
 
-    // Fetch JSON data
+    // Fetches JSON data
     fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
       .then(response => response.json())
       .then(data => {
@@ -88,29 +106,51 @@
         accessJSONData(); // Execute the function after data is loaded
       });
 
-    // Accessing home point's latitude and longitude
+    // Accesses home point's latitude and longitude
     function accessJSONData() {
-      const homeLatitude = json.datum.latitude;
-      const homeLongitude = json.datum.longitude;
+      homeLatitude = json.datum.latitude;
+      homeLongitude = json.datum.longitude;
 
-      // Accessing the first point
+      // Accesses the first point
       const relativeX = json.points[0].head.position.x;
       const relativeY = json.points[0].head.position.y;
       const isTreatmentArea = json.points[0].treatment_area;
 
-      // Calculating the GPS coordinates by adding relative distances to the home point
+      // Calculates the GPS coordinates by adding relative distances to the home point
       const jsonGpsLatitude = homeLatitude + relativeY;
       const jsonGpsLongitude = homeLongitude + relativeX;
 
-      // Creating a string with GPS information for JSON data
+      // Creates with GPS information for JSON data
       const jsonGpsInfo = `Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}`;
 
-      // Creating a string with treatment area information for JSON data
+      // Creates string with treatment area information for JSON data
       const jsonTreatmentAreaInfo = `Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
 
-      // Updating the HTML content for JSON data
+      // Updates HTML content for JSON data
       document.getElementById('json-gps-data').innerHTML = jsonGpsInfo;
       document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
+    }
+
+    // Checks if the ROS coordinates match any point in the JSON data
+    function checkPointsReached(rosLatitude, rosLongitude) {
+      for (const point of json.points) {
+        const relativeX = point.head.position.x;
+        const relativeY = point.head.position.y;
+        const isTreatmentArea = point.treatment_area;
+
+        const jsonGpsLatitude = homeLatitude + relativeY;
+        const jsonGpsLongitude = homeLongitude + relativeX;
+
+        if (rosLatitude === jsonGpsLatitude && rosLongitude === jsonGpsLongitude) {
+          // Display the point reached information
+          const pointsReachedInfo = `Point Reached: Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}, Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
+          document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
+          return;
+        }
+      }
+
+      // If no match is found, display "Not on Map"
+      document.getElementById('points-reached-info').innerHTML = 'Not on Map';
     }
   </script>
 </body>
