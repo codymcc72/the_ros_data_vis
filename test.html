@@ -19,7 +19,8 @@
     }
 
     #json-data,
-    #ros-data {
+    #ros-data,
+    #points-reached {
       margin-bottom: 20px;
     }
 
@@ -42,6 +43,11 @@
     <div id="ros-data">
       <h2>ROS Topic</h2>
       <div id="ros-gps-data"></div>
+    </div>
+    <hr>
+    <div id="points-reached">
+      <h2>Points Reached</h2>
+      <div id="points-reached-info"></div>
     </div>
     <div id="uvc-light-status"></div>
   </div>
@@ -66,6 +72,9 @@
       let rosGpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`;
 
       document.getElementById('ros-gps-data').innerHTML = rosGpsData;
+
+      // Check if the ROS coordinates match any point in the JSON data
+      checkPointsReached(latitude, longitude);
     });
 
     // Create a topic listener for UVC light status
@@ -111,6 +120,28 @@
       // Updating the HTML content for JSON data
       document.getElementById('json-gps-data').innerHTML = jsonGpsInfo;
       document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
+    }
+
+    // Function to check if the ROS coordinates match any point in the JSON data
+    function checkPointsReached(rosLatitude, rosLongitude) {
+      for (const point of json.points) {
+        const relativeX = point.head.position.x;
+        const relativeY = point.head.position.y;
+        const isTreatmentArea = point.treatment_area;
+
+        const jsonGpsLatitude = homeLatitude + relativeY;
+        const jsonGpsLongitude = homeLongitude + relativeX;
+
+        if (rosLatitude === jsonGpsLatitude && rosLongitude === jsonGpsLongitude) {
+          // Display the point reached information
+          const pointsReachedInfo = `Point Reached: Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}, Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
+          document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
+          return;
+        }
+      }
+
+      // If no match is found, display "Not on Map"
+      document.getElementById('points-reached-info').innerHTML = 'Not on Map';
     }
   </script>
 </body>
