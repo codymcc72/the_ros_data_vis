@@ -172,9 +172,12 @@
 
       // If no match is found, display "Not on Map"
       if (!matchFound) {
-        reachedPoints.push({
-          isNotOnMap: true
-        });
+        // Check if "Not on Map" is already in the array before adding it
+        if (!reachedPoints.some(point => point.isNotOnMap)) {
+          reachedPoints.push({
+            isNotOnMap: true
+          });
+        }
       }
 
       // Update the display of reached points
