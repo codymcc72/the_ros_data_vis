@@ -78,45 +78,6 @@
     var totalRobotDistance = 0; // Variable to store the total distance traveled by the robot
     var reachedPoints = []; // Array to store reached points
 
-    // Function to calculate the distance between two points using the Haversine formula
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-      // Convert latitude and longitude from degrees to radians
-      const toRadians = (degree) => (degree * Math.PI) / 180;
-      const R = 6371; // Radius of the Earth in kilometers
-
-      const dLat = toRadians(lat2 - lat1);
-      const dLon = toRadians(lon2 - lon1);
-
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-      // Calculate the distance in kilometers
-      const distance = R * c;
-
-      // Convert distance to feet
-      const distanceInFeet = distance * 3280.84;
-
-      return distanceInFeet;
-    }
-
-    // Function to update the total distance when a new position is received
-    function updateTotalRobotDistance(newLatitude, newLongitude) {
-      if (homeLatitude !== undefined && homeLongitude !== undefined) {
-        // Calculate the distance using the Haversine formula
-        const distance = haversineDistance(homeLatitude, homeLongitude, newLatitude, newLongitude);
-
-        // Add the distance to the total
-        totalRobotDistance += distance;
-
-        // Update home coordinates for the next calculation
-        homeLatitude = newLatitude;
-        homeLongitude = newLongitude;
-      }
-    }
-
     // Creates a topic listener for GPS data
     var gpsListener = new ROSLIB.Topic({
       ros: ros,
@@ -130,6 +91,39 @@
       name: '/tric_navigation/uvc_light_status',
       messageType: 'std_msgs/String'
     });
+
+    // Function to calculate distance using Haversine formula
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Radius of the Earth in kilometers
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c; // Distance in kilometers
+
+      // Convert distance to feet (1 km ≈ 3280.84 feet)
+      return distance * 3280.84;
+    }
+
+    // Function to update the total distance when a new position is received
+    function updateTotalRobotDistance(newLatitude, newLongitude) {
+      if (homeLatitude !== undefined && homeLongitude !== undefined) {
+        // Calculate the distance using the Haversine formula
+        const distance = haversineDistance(homeLatitude, homeLongitude, newLatitude, newLongitude);
+
+        // Add the distance to the total
+        totalRobotDistance += distance;
+      }
+
+      // Update home coordinates for the next calculation
+      homeLatitude = newLatitude;
+      homeLongitude = newLongitude;
+
+      // Example usage
+      console.log('Total Robot Distance:', totalRobotDistance);
+    }
 
     // Subscribes to the GPS topic and update the ROS GPS content
     gpsListener.subscribe(function (message) {
@@ -147,9 +141,6 @@
       const newLatitude = latitude;
       const newLongitude = longitude;
       updateTotalRobotDistance(newLatitude, newLongitude);
-
-      // Example usage
-      console.log('Total Robot Distance:', totalRobotDistance);
     });
 
     // Subscribes to the UVC light status topic and update the HTML content
