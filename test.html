@@ -75,8 +75,8 @@
     // Declares the variables OUTSIDE of the functions
     var homeLatitude;
     var homeLongitude;
+    var totalRobotDistance = 0; // Variable to store the total distance traveled by the robot
     var reachedPoints = []; // Array to store reached points
-    let totalRobotDistance = 0; // Variable to store the total distance traveled by the robot
 
     // Creates a topic listener for GPS data
     var gpsListener = new ROSLIB.Topic({
@@ -105,7 +105,9 @@
       checkPointsReached(latitude, longitude);
 
       // Example usage (call this function when a new position is received)
-      updateTotalRobotDistance(latitude, longitude);
+      const newLatitude = latitude;
+      const newLongitude = longitude;
+      updateTotalRobotDistance(newLatitude, newLongitude);
 
       // Example usage
       console.log('Total Robot Distance:', totalRobotDistance);
@@ -125,7 +127,6 @@
       .then(response => response.json())
       .then(data => {
         json = data; // Store the JSON data in the 'json' variable
-        accessJSONData(); // Initialize homeLatitude and homeLongitude
       });
 
     // Accesses home point's latitude and longitude
@@ -148,7 +149,7 @@
       // Creates string with treatment area information
       const jsonTreatmentAreaInfo = `Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
 
-      // Updates HTML content 
+      // Updates HTML content
       document.getElementById('ros-gps-data').innerHTML = jsonGpsInfo;
       document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
     }
