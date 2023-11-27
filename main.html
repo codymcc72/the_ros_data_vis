@@ -31,6 +31,11 @@
       /* Styling for sub-headings */
       color: green;
     }
+
+    .reached-point {
+      /* Styling for reached points */
+      margin-bottom: 5px;
+    }
   </style>
 
   <!-- JavaScript libraries -->
@@ -68,7 +73,8 @@
 
     // Declares the variables outside the functions
     var homeLatitude;
-    var homeLongitude; 
+    var homeLongitude;
+    var reachedPoints = []; // Array to store reached points
 
     // Creates a topic listener for GPS data
     var gpsListener = new ROSLIB.Topic({
@@ -146,19 +152,4 @@
         const isTreatmentArea = point.treatment_area;
 
         const jsonGpsLatitude = homeLatitude + relativeY;
-        const jsonGpsLongitude = homeLongitude + relativeX;
-
-        if (rosLatitude === jsonGpsLatitude && rosLongitude === jsonGpsLongitude) {
-          // Display the point reached information
-          const pointsReachedInfo = `Point Reached: Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}, Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
-          document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
-          return;
-        }
-      }
-
-      // If no match is found, display "Not on Map"
-      document.getElementById('points-reached-info').innerHTML = 'Not on Map';
-    }
-  </script>
-</body>
-</html>
+        const json
