@@ -20,11 +20,11 @@
 
       // Add the distance to the total
       totalRobotDistance += distance;
-
-      // Update home coordinates for the next calculation
-      homeLatitude = newLatitude;
-      homeLongitude = newLongitude;
     }
+
+    // Update home coordinates for the next calculation
+    homeLatitude = newLatitude;
+    homeLongitude = newLongitude;
   }
 
   // Subscribes to the GPS topic and update the ROS GPS content
@@ -37,6 +37,12 @@
   gpsListener.subscribe(function (message) {
     let latitude = message.latitude;
     let longitude = message.longitude;
+
+    // Initialize home coordinates if not already initialized
+    if (homeLatitude === undefined || homeLongitude === undefined) {
+      homeLatitude = latitude;
+      homeLongitude = longitude;
+    }
 
     let rosGpsData = `GPS: Latitude: ${latitude}<br> GPS: Longitude: ${longitude}<br>`;
 
@@ -155,8 +161,4 @@
     }
 
     // Update HTML content for reached points
-    document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
-  }
-</script>
-</body>
-</html>
+    document.getElementById('points-reached-info').innerHTML = pointsReachedInfo
