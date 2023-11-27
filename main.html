@@ -95,7 +95,7 @@
     let latitude = message.latitude;
     let longitude = message.longitude;
 
-    let rosGpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`;
+    let rosGpsData = `GPS: Latitude: ${latitude}<br> GPS: Longitude: ${longitude}<br>`;
 
     document.getElementById('ros-gps-data').innerHTML = rosGpsData;
 
