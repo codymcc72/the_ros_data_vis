@@ -152,4 +152,36 @@
         const isTreatmentArea = point.treatment_area;
 
         const jsonGpsLatitude = homeLatitude + relativeY;
-        const json
+        const jsonGpsLongitude = homeLongitude + relativeX;
+
+        if (rosLatitude === jsonGpsLatitude && rosLongitude === jsonGpsLongitude) {
+          // Add the reached point to the array
+          reachedPoints.push({
+            latitude: jsonGpsLatitude,
+            longitude: jsonGpsLongitude,
+            isTreatmentArea: isTreatmentArea
+          });
+
+          // Update the display of reached points
+          updateReachedPointsDisplay();
+
+          return;
+        }
+      }
+    }
+
+    // Update the display of reached points
+    function updateReachedPointsDisplay() {
+      var pointsReachedInfo = '';
+
+      // Iterate through reached points and create a display string
+      for (const point of reachedPoints) {
+        pointsReachedInfo += `<div class="reached-point">Point Reached: Latitude ${point.latitude}, Longitude ${point.longitude}, Treatment Area: ${point.isTreatmentArea ? 'Yes' : 'No'}</div>`;
+      }
+
+      // Update HTML content for reached points
+      document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
+    }
+  </script>
+</body>
+</html>
