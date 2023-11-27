@@ -57,6 +57,8 @@
       url: 'ws://0.0.0.0:9090' // default rosbridge server address
     });
 
+    var homeLatitude, homeLongitude; // Declare the variables outside the functions
+
     // Create a topic listener for GPS data
     var gpsListener = new ROSLIB.Topic({
       ros: ros,
@@ -99,8 +101,8 @@
 
     // Accessing home point's latitude and longitude
     function accessJSONData() {
-      const homeLatitude = json.datum.latitude;
-      const homeLongitude = json.datum.longitude;
+      homeLatitude = json.datum.latitude;
+      homeLongitude = json.datum.longitude;
 
       // Accessing the first point
       const relativeX = json.points[0].head.position.x;
