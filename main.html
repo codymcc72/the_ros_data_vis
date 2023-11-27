@@ -4,21 +4,22 @@
   <style>
     /* Styling for the page */
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Trebuchet MS", Helvetica, sans-serif;
     }
 
     h1 {
       /* Styling for the main heading */
       text-align: center;
       border-bottom: 2px solid green;
-      padding-bottom: 10px;
+      padding-bottom: 15px;
+      padding-top: 15px;
       color: white;
       background-color: green;
     }
 
     #combined-data {
       /* Styling for the container div */
-      margin: 20px;
+      margin: 40px;
     }
 
     #ros-data,
@@ -70,7 +71,7 @@
     url: 'ws://0.0.0.0:9090' // default rosbridge server address
   });
 
-  // Declares the variables outside the functions
+  // Declares the variables OUTSIDE of the functions
   var homeLatitude;
   var homeLongitude;
   var reachedPoints = []; // Array to store reached points
@@ -132,13 +133,13 @@
     const jsonGpsLatitude = homeLatitude + relativeY;
     const jsonGpsLongitude = homeLongitude + relativeX;
 
-    // Creates with GPS information for JSON data
+    // Creates a string with GPS information
     const jsonGpsInfo = `Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}`;
 
-    // Creates string with treatment area information for JSON data
+    // Creates string with treatment area information
     const jsonTreatmentAreaInfo = `Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
 
-    // Updates HTML content for JSON data
+    // Updates HTML content 
     document.getElementById('ros-gps-data').innerHTML = jsonGpsInfo;
     document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
   }
