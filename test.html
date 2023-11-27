@@ -28,9 +28,8 @@
     gpsListener.subscribe(function (message) {
       let latitude = message.latitude;
       let longitude = message.longitude;
-      //let timestamp = message.timestamp;
 
-      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`; //, Timestamp: ${timestamp}
+      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`;
 
       document.getElementById('gps-data').innerHTML = gpsData;
     });
@@ -47,6 +46,28 @@
       document.getElementById('uvc-light-status').innerHTML = 'Received: ' + message.data;
     });
 
+    var json; // Assuming you've loaded your JSON data
+
+    // Accessing home point's latitude and longitude
+    const homeLatitude = json.datum.latitude;
+    const homeLongitude = json.datum.longitude;
+
+    function accessJSONData() {
+      // Accessing the first point
+      const relativeX = json.points[0].head.position.x;
+      const relativeY = json.points[0].head.position.y;
+
+      // Calculating the GPS coordinates by adding relative distances to the home point
+      const gpsLatitude = homeLatitude + relativeY;
+      const gpsLongitude = homeLongitude + relativeX;
+
+      // Creating a string with GPS information
+      const gpsInfo = `GPS Point: Latitude ${gpsLatitude}, Longitude ${gpsLongitude}`;
+
+      // Updating the HTML content
+      document.getElementById('gps-data').innerHTML = gpsInfo;
+    }
+
     // Load JSON data using Fetch API and execute accessJSONData() on completion
     fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
       .then(response => response.json())
@@ -54,10 +75,6 @@
         json = data; // Store the JSON data in the 'json' variable
         accessJSONData(); // Execute the function after data is loaded
       });
-
-    function accessJSONData() {
-      console.log(json.points[0].head.position.latitude);
-    }
   </script>
 </body>
 </html>
