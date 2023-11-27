@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     /* Styling for the page */
     body {
@@ -65,14 +63,6 @@
       <h2>Points Reached</h2>
       <div id="points-reached-info"></div>
     </div>
-
-    <hr>
-
-    <!-- Total Distance -->
-    <div id="total-distance">
-      <h2>Total Robot Distance</h2>
-      <div id="total-distance-info"></div>
-    </div>
   </div>
 
   <!-- JavaScript code for ROS Data Visualization -->
@@ -102,29 +92,37 @@
       messageType: 'std_msgs/String'
     });
 
+    // Function to calculate distance using Haversine formula
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Radius of the Earth in kilometers
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c; // Distance in kilometers
+
+      // Convert distance to feet (1 km ≈ 3280.84 feet)
+      return distance * 3280.84;
+    }
+
     // Function to update the total distance when a new position is received
     function updateTotalRobotDistance(newLatitude, newLongitude) {
       if (homeLatitude !== undefined && homeLongitude !== undefined) {
-        const dx = newLongitude - homeLongitude;
-        const dy = newLatitude - homeLatitude;
-        const distance = Math.sqrt(dx ** 2 + dy ** 2);
+        // Calculate the distance using the Haversine formula
+        const distance = haversineDistance(homeLatitude, homeLongitude, newLatitude, newLongitude);
 
         // Add the distance to the total
         totalRobotDistance += distance;
-
-        // Update home coordinates for the next calculation
-        homeLatitude = newLatitude;
-        homeLongitude = newLongitude;
-
-        // Update the display of total robot distance
-        updateTotalDistanceDisplay();
       }
-    }
 
-    // Update the display of total robot distance
-    function updateTotalDistanceDisplay() {
-      // Display the total distance on the webpage as a number
-      document.getElementById('total-distance-info').innerHTML = `Total Robot Distance: ${totalRobotDistance.toFixed(2)} meters`;
+      // Update home coordinates for the next calculation
+      homeLatitude = newLatitude;
+      homeLongitude = newLongitude;
+
+      // Example usage
+      console.log('Total Robot Distance:', totalRobotDistance.toFixed(2), 'feet');
     }
 
     // Subscribes to the GPS topic and update the ROS GPS content
@@ -155,15 +153,11 @@
     });
 
     // Fetches JSON data
-    document.addEventListener('DOMContentLoaded', (event) => {
-      fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
-        .then(response => response.json())
-        .then(data => {
-          json = data; // Store the JSON data in the 'json' variable
-          // Call the function to access JSON data and set initial display
-          accessJSONData();
-        });
-    });
+    fetch('https://cdn.jsdelivr.net/gh/codymcc72/json_data_vis/2.json')
+      .then(response => response.json())
+      .then(data => {
+        json = data; // Store the JSON data in the 'json' variable
+      });
 
     // Accesses home point's latitude and longitude
     function accessJSONData() {
@@ -247,6 +241,5 @@
       document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
     }
   </script>
-
 </body>
 </html>
