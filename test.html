@@ -92,6 +92,22 @@
       messageType: 'std_msgs/String'
     });
 
+    // Function to update the total distance when a new position is received
+    function updateTotalRobotDistance(newLatitude, newLongitude) {
+      if (homeLatitude !== undefined && homeLongitude !== undefined) {
+        const dx = newLongitude - homeLongitude;
+        const dy = newLatitude - homeLatitude;
+        const distance = Math.sqrt(dx ** 2 + dy ** 2);
+
+        // Add the distance to the total
+        totalRobotDistance += distance;
+
+        // Update home coordinates for the next calculation
+        homeLatitude = newLatitude;
+        homeLongitude = newLongitude;
+      }
+    }
+
     // Subscribes to the GPS topic and update the ROS GPS content
     gpsListener.subscribe(function (message) {
       let latitude = message.latitude;
@@ -209,22 +225,6 @@
 
       // Update HTML content for reached points
       document.getElementById('points-reached-info').innerHTML = pointsReachedInfo;
-    }
-
-    // Function to update the total distance when a new position is received
-    function updateTotalRobotDistance(newLatitude, newLongitude) {
-      if (homeLatitude !== undefined && homeLongitude !== undefined) {
-        const dx = newLongitude - homeLongitude;
-        const dy = newLatitude - homeLatitude;
-        const distance = Math.sqrt(dx ** 2 + dy ** 2);
-
-        // Add the distance to the total
-        totalRobotDistance += distance;
-
-        // Update home coordinates for the next calculation
-        homeLatitude = newLatitude;
-        homeLongitude = newLongitude;
-      }
     }
   </script>
 </body>
