@@ -7,8 +7,15 @@
 <body>
   <h1>ROS Data Visualization</h1>
   <div id="combined-data">
-    <div id="gps-data"></div>
+    <div id="json-data">
+      <h2>JSON Point</h2>
+      <div id="json-gps-data"></div>
+    </div>
     <hr>
+    <div id="ros-data">
+      <h2>ROS Topic</h2>
+      <div id="ros-gps-data"></div>
+    </div>
     <div id="uvc-light-status"></div>
   </div>
   <script type="text/javascript">
@@ -24,14 +31,14 @@
       messageType: 'sensor_msgs/NavSatFix'
     });
 
-    // Subscribe to the GPS topic and update the HTML content
+    // Subscribe to the GPS topic and update the ROS GPS content
     gpsListener.subscribe(function (message) {
       let latitude = message.latitude;
       let longitude = message.longitude;
 
-      let gpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`;
+      let rosGpsData = `GPS: Latitude: ${latitude}, Longitude: ${longitude}`;
 
-      document.getElementById('gps-data').innerHTML = gpsData;
+      document.getElementById('ros-gps-data').innerHTML = rosGpsData;
     });
 
     // Create a topic listener for UVC light status
@@ -64,14 +71,14 @@
       const relativeY = json.points[0].head.position.y;
 
       // Calculating the GPS coordinates by adding relative distances to the home point
-      const gpsLatitude = homeLatitude + relativeY;
-      const gpsLongitude = homeLongitude + relativeX;
+      const jsonGpsLatitude = homeLatitude + relativeY;
+      const jsonGpsLongitude = homeLongitude + relativeX;
 
-      // Creating a string with GPS information
-      const gpsInfo = `GPS Point: Latitude ${gpsLatitude}, Longitude ${gpsLongitude}`;
+      // Creating a string with GPS information for JSON data
+      const jsonGpsInfo = `Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}`;
 
-      // Updating the HTML content
-      document.getElementById('gps-data').innerHTML = gpsInfo;
+      // Updating the HTML content for JSON data
+      document.getElementById('json-gps-data').innerHTML = jsonGpsInfo;
     }
   </script>
 </body>
