@@ -108,6 +108,8 @@
       const dy = newLatitude - homeLatitude;
       const distance = Math.sqrt(dx ** 2 + dy ** 2);
 
+      console.log('Distance:', distance);
+
       // Add the distance to the total
       totalRobotDistance += distance;
 
@@ -122,6 +124,8 @@
 
   // Update the display of total robot distance
   function updateTotalDistanceDisplay() {
+
+    console.log('Total Robot Distance:', totalRobotDistance);
     // Display the total distance on the webpage as a number
     document.getElementById('total-distance-info').innerHTML = `Total Robot Distance: ${totalRobotDistance.toFixed(2)} meters`;
   }
