@@ -2,11 +2,13 @@
 <html>
 <head>
   <style>
+    /* Styling for the page */
     body {
       font-family: Arial, sans-serif;
     }
 
     h1 {
+      /* Styling for the main heading */
       text-align: center;
       border-bottom: 2px solid green;
       padding-bottom: 10px;
@@ -15,47 +17,49 @@
     }
 
     #combined-data {
+      /* Styling for the container div */
       margin: 20px;
     }
 
-    #json-data,
     #ros-data,
     #points-reached {
+      /* Styling for the sub-sections within the container */
       margin-bottom: 20px;
     }
 
     h2 {
+      /* Styling for sub-headings */
       color: green;
     }
   </style>
 
-  <!--JavaScript libraries -->
+  <!-- JavaScript libraries -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
 
 </head>
 <body>
+  <!-- Main content -->
   <h1>ROS Data Visualization</h1>
   <div id="combined-data">
-    <div id="json-data">
-      <h2>JSON Point</h2>
-      <div id="json-gps-data"></div>
-      <div id="json-treatment-area"></div>
-    </div>
-    <hr>
+
+    <!-- ROS Topic Section -->
     <div id="ros-data">
       <h2>ROS Topic</h2>
       <div id="ros-gps-data"></div>
+      <div id="uvc-light-status-info">UVC Light Status: <span id="uvc-light-status"></span></div>
     </div>
+
     <hr>
+
+    <!-- Points Reached Section -->
     <div id="points-reached">
       <h2>Points Reached</h2>
       <div id="points-reached-info"></div>
     </div>
-    <div id="uvc-light-status"></div>
   </div>
 
-  <!-- Code for ROS Data Visualization in JS -->
+  <!-- JavaScript code for ROS Data Visualization -->
   <script type="text/javascript">
     // Creates a ROS instance
     var ros = new ROSLIB.Ros({
@@ -63,7 +67,7 @@
     });
 
     // Declares the variables outside the functions
-    var homeLatitude
+    var homeLatitude;
     var homeLongitude; 
 
     // Creates a topic listener for GPS data
@@ -95,7 +99,11 @@
 
     // Subscribes to the UVC light status topic and update the HTML content
     uvcLightStatusListener.subscribe(function (message) {
-      document.getElementById('uvc-light-status').innerHTML = 'Received: ' + message.data;
+      // Extracts the status from the message (assuming it's a string of 0s)
+      const uvcLightStatus = message.data === '0000' ? 'Off' : 'On';
+
+      // Updates HTML content for UVC light status
+      document.getElementById('uvc-light-status').innerHTML = uvcLightStatus;
     });
 
     // Fetches JSON data
@@ -103,7 +111,6 @@
       .then(response => response.json())
       .then(data => {
         json = data; // Store the JSON data in the 'json' variable
-        accessJSONData(); // Execute the function after data is loaded
       });
 
     // Accesses home point's latitude and longitude
@@ -127,7 +134,7 @@
       const jsonTreatmentAreaInfo = `Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
 
       // Updates HTML content for JSON data
-      document.getElementById('json-gps-data').innerHTML = jsonGpsInfo;
+      document.getElementById('ros-gps-data').innerHTML = jsonGpsInfo;
       document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
     }
 
