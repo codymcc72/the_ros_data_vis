@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+      border-bottom: 2px solid green;
+      padding-bottom: 10px;
+      color: white;
+      background-color: green;
+    }
+
+    #combined-data {
+      margin: 20px;
+    }
+
+    #json-data,
+    #ros-data {
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: green;
+    }
+  </style>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.9/lib/eventemitter2.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
 </head>
@@ -10,6 +36,7 @@
     <div id="json-data">
       <h2>JSON Point</h2>
       <div id="json-gps-data"></div>
+      <div id="json-treatment-area"></div>
     </div>
     <hr>
     <div id="ros-data">
@@ -69,6 +96,7 @@
       // Accessing the first point
       const relativeX = json.points[0].head.position.x;
       const relativeY = json.points[0].head.position.y;
+      const isTreatmentArea = json.points[0].treatment_area;
 
       // Calculating the GPS coordinates by adding relative distances to the home point
       const jsonGpsLatitude = homeLatitude + relativeY;
@@ -77,8 +105,12 @@
       // Creating a string with GPS information for JSON data
       const jsonGpsInfo = `Latitude ${jsonGpsLatitude}, Longitude ${jsonGpsLongitude}`;
 
+      // Creating a string with treatment area information for JSON data
+      const jsonTreatmentAreaInfo = `Treatment Area: ${isTreatmentArea ? 'Yes' : 'No'}`;
+
       // Updating the HTML content for JSON data
       document.getElementById('json-gps-data').innerHTML = jsonGpsInfo;
+      document.getElementById('json-treatment-area').innerHTML = jsonTreatmentAreaInfo;
     }
   </script>
 </body>
