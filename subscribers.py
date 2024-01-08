@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+#!/usr/bin/env python
 
 import rospy
 import json
@@ -8,10 +8,18 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from sensor_msgs.msg import NavSatFix
+from std_msgs.msg import String, Bool
+from rosbag_pkg.msg import PLC_Feedback
 
-# Add or change topics here
 gps_head_data = '/tric_navigation/gps/head_data'
 gps_tail_data = '/tric_navigation/gps/tail_data'
+gps_location_head = '/tric_navigation/gps/head_location'
+gps_location_tail = '/tric_navigation/gps/tail_location'
+gps_head_status = '/tric_navigation/gps/head_status'
+gps_tail_status = '/tric_navigation/gps/tail_status'
+joystick_data_topic = '/tric_navigation/joystick_control'
+uvc_topic = '/tric_navigation/uvc_light_status'
+plc_feedback_topic = '/tric_navigation/plc_feedback'
 #Add or chnage paths here
 json_map_path = 'json_maps/testrow4.json'
 bag_path = 'e0_rosbags/2023-12-06-15-32-37.bag'
@@ -108,10 +116,100 @@ class GPSData:
         y_m = y_km * 1000
 
         return x_m, y_m
+    
+    def to_dataframe(self):
+        return pd.DataFrame(self.data)
+    
+class GPSLocation:
+    def __init__(self, topic_name):
+        self.topic_name = topic_name
+        self.data = []
+        rospy.init_node('gps_location_node', anonymous=True)
+        rospy.Subscriber(self.topic_name, NavSatFix, self.callback)
+        rospy.spin()
+
+    def callback(self, msg):
+        t = rospy.get_time()
+        if self.topic_name == '/tric_navigation/gps/tail_location':
+            self.data.append({'timestamp': t, 'tail_lon': msg.longitude, 'tail_lat': msg.latitude})
+        else:
+            self.data.append({'timestamp': t, 'head_lon': msg.longitude, 'head_lat': msg.latitude})
+
+    def to_dataframe(self):
+        return pd.DataFrame(self.data)
+
+
+class GPSStatus:
+    def __init__(self, topic_name):
+        self.topic_name = topic_name
+        self.data = []
+        rospy.init_node('gps_status_node', anonymous=True)
+        rospy.Subscriber(self.topic_name, String, self.callback)  # Replace Status with the correct message type
+        rospy.spin()
+
+    def callback(self, msg):
+        t = rospy.get_time()
+        if self.topic_name == '/tric_navigation/gps/tail_status':
+            self.data.append({'timestamp': t, 'tail_status': msg.data})
+        else:
+            self.data.append({'timestamp': t, 'head_status': msg.data})
+
+    def to_dataframe(self):
+        return pd.DataFrame(self.data)
+
+
+class JoystickData:
+    def __init__(self, topic_name):
+        self.topic_name = topic_name
+        self.data = []
+        rospy.init_node('joystick_data_node', anonymous=True)
+        rospy.Subscriber(self.topic_name, Bool, self.callback)
+        rospy.spin()
+
+    def callback(self, msg):
+        t = rospy.get_time()
+        self.data.append({'timestamp': t, 'joystick_control': msg.data})
+
+    def to_dataframe(self):
+        return pd.DataFrame(self.data)
+
+
+class UVCData:
+    def __init__(self, topic_name):
+        self.topic_name = topic_name
+        self.data = []
+        rospy.init_node('uvc_data_node', anonymous=True)
+        rospy.Subscriber(self.topic_name, String, self.callback)
+        rospy.spin()
+
+    def callback(self, msg):
+        t = rospy.get_time()
+        self.data.append({'timestamp': t, 'uvc_status': msg.data})
+
+    def to_dataframe(self):
+        return pd.DataFrame(self.data)
+
+
+class PLCData:
+    def __init__(self, topic_name):
+        self.topic_name = topic_name
+        self.data = []
+        rospy.init_node('plc_data_node', anonymous=True)
+        rospy.Subscriber(self.topic_name, PLC_Feedback, self.callback)
+        rospy.spin()
+
+    def callback(self, msg):
+        t = rospy.get_time()
+        self.data.append({'timestamp': t, 'boom_position': msg.boom_position, 
+                          'left_wing_position': msg.left_wing_position, 
+                          'right_wing_position': msg.right_wing_position})
+
+    def to_dataframe(self):
+        return pd.DataFrame(self.data)
 
 def main():
 
     print(GPSData(gps_head_data, bag_path).to_dataframe())
-    
+
 if __name__ == '__main__':
     main()
