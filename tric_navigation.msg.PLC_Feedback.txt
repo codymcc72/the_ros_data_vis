@@ -1,0 +1,12 @@
+float64 steering_angle
+float64 left_wing_position
+float64 right_wing_position
+float64 boom_position
+float64 linear_velocity
+#float64 linear_acceleration
+#float64 angular_velocity
+#float64 front_wheel_valve_output
+#float64 steering_valve_output
+#float64 left_wing_valve_output
+#float64 right_wing_valve_output
+#loat64 boom_valve_output
